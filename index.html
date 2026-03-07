@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capital Risk</title>
+<meta name="description" content="Strategic capital advisory and risk intelligence. Launching soon.">
+<meta property="og:title" content="Capital Risk">
+<meta property="og:description" content="Strategic capital advisory and risk intelligence.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://capitalrisk.eu">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Capital Risk">
+<meta name="twitter:description" content="Strategic capital advisory and risk intelligence.">
+<link rel="canonical" href="https://capitalrisk.eu">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Cormorant+Garamond:wght@300;400&display=swap" rel="stylesheet">
+
+<style>
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --silver: #f8fbff;
+  --pale:   #f8fbff;
+  --muted:  rgba(215,235,255,1.0);
+  --faint:  rgba(200,225,255,0.90);
+  --gold:   #7eb8f7;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  height: 100vh;
+  height: 100dvh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: #fff;
+  font-family: 'Cormorant Garamond', serif;
+  text-align: center;
+  overflow: hidden;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  touch-action: none;
+  background: #010812;
+  /* fallback if images fail to load */
+  background-image: radial-gradient(ellipse at 50% 80%, #0d2040 0%, #010812 70%);
+}
+
+#bg-space {
+  position: absolute;
+  top: 0; left: 0;
+  width: 4608px;
+  height: 100%;
+  background: url(space_bg_tiled.png) 0 0 / 4608px 100% no-repeat;
+  will-change: transform;
+  animation: skyDrift 60s linear infinite;
+  z-index: 0;
+  filter: brightness(1.9) contrast(1.6) saturate(1.3);
+}
+@keyframes skyDrift {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-1536px); }
+}
+
+#bg-earth {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background: url(earth_layer.png) center bottom / cover no-repeat;
+  z-index: 1;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 48%, rgba(0,10,40,0.04) 0%, transparent 100%),
+    radial-gradient(ellipse at center top,    transparent 25%, rgba(0,5,20,0.08) 100%),
+    radial-gradient(ellipse at center bottom, rgba(0,0,0,0) 0%, transparent 55%),
+    rgba(0,5,20,0.04);
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* aurora shimmer — slow blue wave above horizon */
+.aurora {
+  position: absolute;
+  bottom: 0; left: -20%;
+  width: 140%; height: 35%;
+  background:
+    radial-gradient(ellipse 30% 25% at 15% 100%, rgba(40,120,255,0.30) 0%, transparent 70%),
+    radial-gradient(ellipse 30% 25% at 85% 100%, rgba(60,180,255,0.25) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 2;
+  animation: auroraPulse 12s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+@keyframes auroraPulse {
+  0%   { opacity: 0.6; transform: scaleX(1)    translateY(0); }
+  30%  { opacity: 1;   transform: scaleX(1.04) translateY(-4px); }
+  60%  { opacity: 0.7; transform: scaleX(0.97) translateY(2px); }
+  100% { opacity: 0.6; transform: scaleX(1)    translateY(0); }
+}
+.atmosphere {
+  display: none;
+}
+
+
+.cosmic-dust {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(rgba(255,255,255,0.12) 1px, transparent 1px),
+    radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px);
+  background-size: 180px 180px;
+  background-position: 0 0, 90px 90px;
+  animation: dustMove 200s linear infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+@keyframes dustMove {
+  0%   { transform: translate(0, 0); }
+  100% { transform: translate(-60px, -500px); }
+}
+
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  animation: fall linear infinite;
+  z-index: 3;
+}
+.star.small  { width: 1px; height: 1px; }
+.star.medium { width: 2px; height: 2px; }
+.star.large  { width: 3px; height: 3px; box-shadow: 0 0 6px rgba(255,255,255,1.0), 0 0 12px rgba(200,230,255,0.6); }
+
+@keyframes fall {
+  0%   { transform: translateY(-10px); opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 0.85; }
+  100% { transform: translateY(110vh); opacity: 0; }
+}
+
+/* ── CONTENT ── */
+.content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  will-change: transform;
+}
+
+.eyebrow {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: 11px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--silver);
+  opacity: 0;
+  animation: fadeUp 1.4s cubic-bezier(0.16,1,0.3,1) forwards;
+  animation-delay: 0.5s;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(52px, 8vw, 96px);
+  font-weight: 700;
+  letter-spacing: clamp(6px, 1.2vw, 14px);
+  line-height: 1;
+  opacity: 0;
+  animation: fadeUp 2.2s cubic-bezier(0.16,1,0.3,1) forwards;
+  animation-delay: 0.7s;
+}
+h1 .letter { display: inline-block; }
+
+/* Rule — gold diamond node */
+.rule-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 26px 0;
+  opacity: 0;
+  animation: fadeUp 1.4s cubic-bezier(0.16,1,0.3,1) forwards;
+  animation-delay: 1.1s;
+}
+.rule-line {
+  width: 52px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(120,190,255,0.90));
+}
+.rule-line.r {
+  background: linear-gradient(270deg, transparent, rgba(120,190,255,0.90));
+}
+.rule-node {
+  width: 8px; height: 8px;
+  background: #ffffff;
+  transform: rotate(45deg);
+  outline: 1.5px solid rgba(80,150,255,0.9);
+  outline-offset: 2px;
+  box-shadow: 0 0 10px rgba(120,190,255,1), 0 0 22px rgba(80,150,255,0.6);
+  flex-shrink: 0;
+  animation: nodePulse 3.5s ease-in-out infinite;
+  animation-delay: 3s;
+}
+@keyframes nodePulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(120,190,255,0.8), 0 0 18px rgba(80,150,255,0.4); }
+  50%       { box-shadow: 0 0 18px rgba(180,220,255,1), 0 0 35px rgba(100,170,255,0.7); }
+}
+
+.tagline {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(16px, 2vw, 21px);
+  letter-spacing: 1px;
+  color: var(--pale);
+  opacity: 0;
+  animation: fadeUp 1.4s cubic-bezier(0.16,1,0.3,1) forwards;
+  animation-delay: 1.25s;
+}
+
+.domain {
+  margin-top: 10px;
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: 13px;
+  letter-spacing: 4px;
+  color: var(--muted);
+  text-decoration: none;
+  opacity: 0;
+  animation: fadeUp 1.4s cubic-bezier(0.16,1,0.3,1) forwards;
+  animation-delay: 1.4s;
+  transition: color 0.3s ease;
+}
+.domain:hover {
+  color: var(--silver);
+}
+
+/* ── BOTTOM ── */
+.bottom-section {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 26px;
+  z-index: 10;
+  opacity: 0;
+  animation: fadeUp 1.4s cubic-bezier(0.16,1,0.3,1) forwards;
+  animation-delay: 1.8s;
+}
+
+.launch-label {
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
+  font-size: clamp(18px, 4vw, 28px);
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-shadow: 0 0 20px rgba(120,190,255,0.8), 0 0 40px rgba(80,150,255,0.4);
+  margin-bottom: 14px;
+}
+
+.launch-pulse {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.pulse-wrap {
+  position: relative;
+  width: 16px; height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.pulse-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(140,200,255,1);
+  box-shadow: 0 0 14px rgba(120,190,255,1), 0 0 28px rgba(80,160,255,0.6);
+  animation: pulse 2.4s ease-in-out infinite;
+  position: relative; z-index: 2;
+}
+.pulse-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 5px; height: 5px;
+  margin-top: -2.5px; margin-left: -2.5px;
+  border-radius: 50%;
+  border: 1px solid rgba(120,180,255,0.5);
+  animation: sonar 2.4s ease-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.4); }
+}
+@keyframes sonar {
+  0%   { transform: scale(1);   opacity: 0.7; }
+  100% { transform: scale(6);   opacity: 0; }
+}
+
+/* email link */
+.launch-email {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(15px, 3vw, 20px);
+  letter-spacing: 3px;
+  color: var(--silver);
+  text-decoration: none;
+  position: relative;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+.launch-email::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%; right: 50%;
+  height: 1px;
+  background: rgba(200,212,224,0.6);
+  transition: left 0.38s cubic-bezier(0.16,1,0.3,1),
+              right 0.38s cubic-bezier(0.16,1,0.3,1);
+}
+.launch-email:hover {
+  color: #fff;
+  text-shadow: 0 0 24px rgba(100,180,255,0.8);
+}
+.launch-email:hover::after {
+  left: 0; right: 0;
+}
+
+.footer {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 400;
+  font-size: clamp(12px, 2vw, 14px);
+  letter-spacing: 4px;
+  color: rgba(180,215,255,0.85);
+  white-space: nowrap;
+}
+
+@keyframes fadeUp {
+  0%   { opacity: 0; transform: translateY(14px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ── MOBILE & NARROW SCREEN FIXES ── */
+@media (max-width: 480px) {
+  body {
+    padding: 0 20px;
+    overflow-x: hidden;
+  }
+
+  .content {
+    padding: 0 16px;
+    width: 100%;
+  }
+
+  .eyebrow {
+    font-size: 9px;
+    letter-spacing: 4px;
+    margin-bottom: 14px;
+    white-space: normal;
+    line-height: 1.6;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: clamp(38px, 12vw, 58px);
+    letter-spacing: clamp(4px, 2vw, 8px);
+    white-space: nowrap;
+  }
+
+  .tagline {
+    font-size: clamp(14px, 4.5vw, 18px);
+    padding: 0 10px;
+  }
+
+  .domain {
+    font-size: 11px;
+    letter-spacing: 2px;
+  }
+
+  .rule-wrap {
+    margin: 18px 0;
+  }
+
+  .rule-line {
+    width: 36px;
+  }
+
+  .bottom-section {
+    padding-bottom: 20px;
+    padding-left: 16px;
+    padding-right: 16px;
+    width: 100%;
+  }
+
+  .launch-label {
+    font-size: 9px;
+    letter-spacing: 5px;
+  }
+
+  .launch-email {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    word-break: break-all;
+  }
+
+  .footer {
+    font-size: 9px;
+    letter-spacing: 2px;
+  }
+
+  /* Reduce star count impact on mobile */
+  .cosmic-dust {
+    background-size: 120px 120px;
+    background-position: 0 0, 60px 60px;
+  }
+}
+
+@media (max-width: 360px) {
+  h1 {
+    font-size: clamp(30px, 10.5vw, 42px);
+    letter-spacing: 3px;
+  }
+
+  .eyebrow {
+    font-size: 8px;
+    letter-spacing: 3px;
+  }
+
+  .launch-email {
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .eyebrow {
+    font-size: 10px;
+    letter-spacing: 5px;
+  }
+
+  h1 {
+    font-size: clamp(44px, 9vw, 72px);
+    letter-spacing: clamp(5px, 1.5vw, 10px);
+  }
+
+  .tagline {
+    font-size: clamp(15px, 3vw, 19px);
+  }
+
+  .bottom-section {
+    padding-bottom: 22px;
+  }
+
+  .launch-email {
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+}
+
+/* ── Accessibility: respect reduced motion preference ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .eyebrow, h1, .rule-wrap, .tagline, .domain, .bottom-section {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+
+#continents {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background: url(continents_overlay.png) center bottom / cover no-repeat;
+  z-index: 2;
+  pointer-events: none;
+}
+
+</style>
+</head>
+<body>
+
+  <div id="bg-space"></div>
+  <div id="bg-earth"></div>
+  <div id="continents"></div>
+  <div class="aurora"></div>
+  <div class="atmosphere"></div>
+  <div class="vignette"></div>
+  <div class="horizon-glow"></div>
+  <div class="cosmic-dust"></div>
+
+  <div class="content" id="content">
+    <div class="eyebrow">Strategic Capital &nbsp;&thinsp;|&thinsp;&nbsp; Risk Intelligence</div>
+    <h1 id="main-title">CAPITAL RISK</h1>
+    <div class="rule-wrap">
+      <div class="rule-line"></div>
+      <div class="rule-node"></div>
+      <div class="rule-line r"></div>
+    </div>
+    <div class="tagline">Capital moves quietly</div>
+    <a class="domain" href="https://capitalrisk.eu">capitalrisk.eu</a>
+  </div>
+
+  <div class="bottom-section">
+    <div class="launch-label">Launching Soon</div>
+    <div class="launch-pulse">
+      <div class="pulse-wrap">
+        <div class="pulse-ring"></div>
+        <div class="pulse-dot"></div>
+      </div>
+      <a class="launch-email" href="/cdn-cgi/l/email-protection#a9cac6c7ddc8cadde9cac8d9c0ddc8c5dbc0dac287ccdc">contact&#64;capitalrisk.eu</a>
+    </div>
+    <div class="footer">CAPITAL RISK &nbsp;&copy;&nbsp; 2026</div>
+  </div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+(function () {
+  'use strict';
+
+  /* ── 1. FALLING STARS ── */
+  var sizes = ['small','small','small','medium','medium','large'];
+  var starCount = window.innerWidth < 480 ? 60 : 150;
+  for (var i = 0; i < starCount; i++) {
+    var star = document.createElement('div');
+    star.className = 'star ' + sizes[Math.floor(Math.random() * sizes.length)];
+    star.style.left              = (Math.random() * 100) + '%';
+    star.style.top               = (Math.random() * 110 - 10) + '%';
+    star.style.animationDuration = (6 + Math.random() * 14) + 's';
+    star.style.animationDelay    = -(Math.random() * 20) + 's';
+    document.body.appendChild(star);
+  }
+
+  /* ── 2. MOUSE PARALLAX ── */
+  var earth   = document.getElementById('bg-earth');
+  var content = document.getElementById('content');
+  var tx = 0, ty = 0, mx = 0, my = 0;
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ── CURSOR TRAIL CANVAS ──
+  var trailCanvas = document.createElement('canvas');
+  trailCanvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999;';
+  document.body.appendChild(trailCanvas);
+  var tctx = trailCanvas.getContext('2d');
+
+  function resizeTrail() {
+    trailCanvas.width  = window.innerWidth;
+    trailCanvas.height = window.innerHeight;
+  }
+  resizeTrail();
+  window.addEventListener('resize', resizeTrail);
+
+  var trailParticles = [];
+  var mouseX = 0, mouseY = 0;
+  var lastMouseX = 0, lastMouseY = 0;
+
+  // Same blue-white palette as letter dust
+  var TRAIL_COLORS = [
+    [220, 240, 255],
+    [255, 255, 255],
+    [180, 220, 255],
+    [210, 245, 255],
+    [150, 210, 255],
+    [230, 235, 255],
+    [255, 255, 255],
+  ];
+
+  function spawnTrailParticle(x, y, speed) {
+    var col  = TRAIL_COLORS[Math.floor(Math.random() * TRAIL_COLORS.length)];
+    var type = Math.random();
+    var angle = Math.random() * Math.PI * 2;
+    var v     = 0.15 + Math.random() * 0.6 * speed;
+    trailParticles.push({
+      x: x + (Math.random() - 0.5) * 6,
+      y: y + (Math.random() - 0.5) * 6,
+      vx: Math.cos(angle) * v,
+      vy: Math.sin(angle) * v - 0.15,
+      life: 0.4 + Math.random() * 0.9,
+      maxLife: 0,
+      r: col[0], g: col[1], b: col[2],
+      size: type < 0.75
+        ? (0.4 + Math.random() * 1.0)
+        : (0.6 + Math.random() * 0.8),
+      type: type < 0.75 ? 'dot' : 'cross',
+      twinkle: Math.random() * Math.PI * 2
+    });
+    trailParticles[trailParticles.length-1].maxLife = trailParticles[trailParticles.length-1].life;
+  }
+
+  var trailLastTime = 0;
+
+  (function trailLoop(now) {
+    var dt = Math.min((now - trailLastTime) / 1000, 0.05);
+    trailLastTime = now;
+
+    tctx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
+
+    // spawn particles based on mouse movement speed
+    var dx    = mouseX - lastMouseX;
+    var dy    = mouseY - lastMouseY;
+    var speed = Math.sqrt(dx*dx + dy*dy);
+    if (speed > 1.5) {
+      var count = Math.min(Math.floor(speed * 0.18), 5);
+      for (var i = 0; i < count; i++) {
+        var t  = i / Math.max(count - 1, 1);
+        var px = lastMouseX + dx * t;
+        var py = lastMouseY + dy * t;
+        spawnTrailParticle(px, py, Math.min(speed / 30, 1));
+      }
+    }
+    lastMouseX = mouseX;
+    lastMouseY = mouseY;
+
+    // update & draw
+    for (var p = trailParticles.length - 1; p >= 0; p--) {
+      var pt = trailParticles[p];
+      pt.life -= dt;
+      if (pt.life <= 0) { trailParticles.splice(p, 1); continue; }
+      pt.x += pt.vx;
+      pt.y += pt.vy;
+      pt.vy -= 0.006;
+
+      var lr     = pt.life / pt.maxLife;
+      var fadeA  = lr < 0.25 ? lr / 0.25 : lr;
+      var twink  = 0.6 + 0.4 * Math.sin(now * 0.014 + pt.twinkle);
+      var alpha  = Math.min(fadeA * twink * 0.85, 1);
+      var sz     = pt.size * (0.4 + 0.6 * lr);
+
+      tctx.save();
+      tctx.globalAlpha = alpha;
+      tctx.shadowColor = 'rgba(' + pt.r + ',' + pt.g + ',' + pt.b + ',1)';
+      tctx.shadowBlur  = sz * 3;
+      tctx.fillStyle   = 'rgba(' + pt.r + ',' + pt.g + ',' + pt.b + ',1)';
+      tctx.translate(pt.x, pt.y);
+
+      if (pt.type === 'dot') {
+        tctx.beginPath();
+        tctx.arc(0, 0, sz, 0, Math.PI * 2);
+        tctx.fill();
+      } else {
+        tctx.rotate(now * 0.001 + pt.twinkle);
+        var long = sz * 2.2, short = sz * 0.25;
+        tctx.fillRect(-short, -long, short*2, long*2);
+        tctx.fillRect(-long, -short, long*2, short*2);
+      }
+      tctx.restore();
+    }
+
+    requestAnimationFrame(trailLoop);
+  })(0);
+
+  if (!reducedMotion) {
+    document.addEventListener('mousemove', function(e) {
+      mx = (e.clientX / window.innerWidth  - 0.5);
+      my = (e.clientY / window.innerHeight - 0.5);
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    (function parallaxLoop() {
+      tx += (mx - tx) * 0.035;
+      ty += (my - ty) * 0.035;
+      earth.style.transform   = 'translate(' + (-tx * 12) + 'px,' + (-ty * 7) + 'px)';
+      content.style.transform = 'translate(' + ( tx *  5) + 'px,' + ( ty * 3) + 'px)';
+      requestAnimationFrame(parallaxLoop);
+    })();
+  }
+
+  /* ── 3. LETTER SHINE + CRISP BLUE DUST ── */
+  var h1  = document.getElementById('main-title');
+  var raw = 'CAPITAL RISK';
+  h1.textContent = '';
+  h1.style.position = 'relative';
+
+  var spans = [];
+  for (var c = 0; c < raw.length; c++) {
+    var span = document.createElement('span');
+    span.className   = 'letter';
+    span.textContent = raw[c] === ' ' ? '\u00A0' : raw[c];
+    span.style.color = 'rgba(255,255,255,0.55)';
+    h1.appendChild(span);
+    spans.push(span);
+  }
+
+  // ── Dust canvas ──
+  var dustCanvas = document.createElement('canvas');
+  dustCanvas.style.cssText = 'position:absolute;top:-40px;left:0;pointer-events:none;z-index:20;';
+  h1.appendChild(dustCanvas);
+
+  function resizeDust() {
+    var r = h1.getBoundingClientRect();
+    dustCanvas.width  = r.width;
+    dustCanvas.height = r.height + 80;
+  }
+  resizeDust();
+  window.addEventListener('resize', resizeDust);
+  var dctx = dustCanvas.getContext('2d');
+
+  // ── Blue-white dust palette ──
+  // crisp icy blue → pure white → electric cyan → soft lavender
+  var DUST_COLORS = [
+    [200, 230, 255],  // soft ice blue
+    [220, 240, 255],  // pale blue-white
+    [255, 255, 255],  // pure white spark
+    [180, 220, 255],  // sky blue
+    [210, 245, 255],  // crystal cyan
+    [230, 235, 255],  // white-lavender
+    [150, 210, 255],  // vivid blue
+    [255, 255, 255],  // white flash
+  ];
+
+  var particles = [];
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+  function spawnDust(x, y, intensity) {
+    // particles fly outward from letter edges in all directions
+    var angle = Math.random() * Math.PI * 2;
+    var speed = 0.2 + Math.random() * 1.4;
+    var col   = DUST_COLORS[Math.floor(Math.random() * DUST_COLORS.length)];
+    // mix of tiny pinpoints and slightly larger sparks for quality feel
+    var type  = Math.random(); // 0..1: <0.82 = tiny dot, >0.82 = small cross spark
+    particles.push({
+      x: x, y: y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 0.3, // slight upward drift
+      life: 0.4 + Math.random() * 1.0,
+      maxLife: 0,
+      r: col[0], g: col[1], b: col[2],
+      size: type < 0.82 ? (0.4 + Math.random() * 1.0)
+           : (0.7 + Math.random() * 0.7),
+      type: type < 0.82 ? 'dot' : 'cross',
+      angle: Math.random() * Math.PI,
+      intensity: intensity,
+      twinkle: Math.random() * Math.PI * 2  // phase offset for individual twinkle
+    });
+    particles[particles.length-1].maxLife = particles[particles.length-1].life;
+  }
+
+  var SWEEP_MS  = 16000;
+  var WIN       = 0.18;
+  var PAUSE_MS  = 7000;
+  var DELAY_MS  = 2600;
+  var sweepDir  = 1;
+  var BEAM_START = -WIN;
+  var BEAM_END   =  1 + WIN;
+  var lastNow   = 0;
+
+  function sweep() {
+    var dir = sweepDir;
+    sweepDir = -sweepDir;
+    var start = null;
+
+    requestAnimationFrame(function loop(now) {
+      if (!start) start = now;
+      var dt = Math.min((now - lastNow) / 1000, 0.05);
+      lastNow = now;
+
+      var t    = Math.min((now - start) / SWEEP_MS, 1);
+      var bt   = BEAM_START + t * (BEAM_END - BEAM_START);
+      var beam = dir === 1 ? bt : (BEAM_START + BEAM_END) - bt;
+
+      // clear dust canvas
+      dctx.clearRect(0, 0, dustCanvas.width, dustCanvas.height);
+
+      for (var s = 0; s < spans.length; s++) {
+        var pos  = s / (spans.length - 1);
+        var dist = Math.abs(beam - pos);
+
+        if (dist < WIN) {
+          var e     = Math.pow(1 - dist / WIN, 2.5);
+          var alpha = lerp(0.55, 1.0, e);
+
+          // letter brightness — clean white-blue
+          spans[s].style.color =
+            e > 0.85
+              ? 'rgba(255,255,255,1)'
+              : 'rgba(255,255,255,' + alpha + ')';
+
+          // crisp focused glow — tight inner + broad outer
+          spans[s].style.textShadow =
+            '0 0 ' + (4  * e) + 'px rgba(255,255,255,'  + (1.0  * e) + '),' +
+            '0 0 ' + (10 * e) + 'px rgba(200,235,255,'  + (0.95 * e) + '),' +
+            '0 0 ' + (22 * e) + 'px rgba(140,200,255,'  + (0.75 * e) + '),' +
+            '0 0 ' + (45 * e) + 'px rgba(80, 160,255,'  + (0.45 * e) + '),' +
+            '0 0 ' + (80 * e) + 'px rgba(40, 120,255,'  + (0.20 * e) + ')';
+
+          // spawn dust from letter bounding box edges
+          if (e > 0.15 && Math.random() < e * 5) {
+            var r2 = spans[s].getBoundingClientRect();
+            var cr = dustCanvas.getBoundingClientRect();
+            var px, py, side = Math.floor(Math.random() * 4);
+            if      (side===0){ px = r2.left + Math.random()*r2.width; py = r2.top; }
+            else if (side===1){ px = r2.right;  py = r2.top + Math.random()*r2.height; }
+            else if (side===2){ px = r2.left + Math.random()*r2.width; py = r2.bottom; }
+            else              { px = r2.left;   py = r2.top + Math.random()*r2.height; }
+            spawnDust(px - cr.left, py - cr.top + 40, e);
+          }
+        } else {
+          spans[s].style.color      = 'rgba(255,255,255,0.55)';
+          spans[s].style.textShadow = 'none';
+        }
+      }
+
+      // ── draw particles ──
+      for (var p = particles.length - 1; p >= 0; p--) {
+        var pt = particles[p];
+        pt.life -= dt;
+        if (pt.life <= 0) { particles.splice(p, 1); continue; }
+        pt.x  += pt.vx;
+        pt.y  += pt.vy;
+        pt.vy -= 0.008; // gentle float upward
+
+        var lr    = pt.life / pt.maxLife;
+        // sharp fade-in, long hold, then fade out
+        var fadeA = lr > 0.85 ? (1 - lr) / 0.15 : lr < 0.25 ? lr / 0.25 : 1.0;
+        // individual twinkle — each particle pulses independently
+        var twink = 0.6 + 0.4 * Math.sin(now * 0.012 + pt.twinkle + pt.x * 0.05);
+        var alpha = clamp(fadeA * twink * pt.intensity, 0, 1);
+        var sz    = pt.size * (0.5 + 0.5 * lr);
+
+        dctx.save();
+        dctx.globalAlpha = alpha;
+        dctx.shadowColor = 'rgba(' + pt.r + ',' + pt.g + ',' + pt.b + ',1)';
+        dctx.shadowBlur  = sz * 3.2;
+        dctx.fillStyle   = 'rgba(' + pt.r + ',' + pt.g + ',' + pt.b + ',1)';
+        dctx.translate(pt.x, pt.y);
+
+        if (pt.type === 'dot') {
+          // crisp bright pinpoint
+          dctx.beginPath();
+          dctx.arc(0, 0, sz, 0, Math.PI * 2);
+          dctx.fill();
+        } else if (pt.type === 'cross') {
+          // 4-pointed star spark — classic crisp sparkle
+          dctx.rotate(now * 0.001 + pt.twinkle);
+          var long = sz * 2.4, short = sz * 0.28;
+          dctx.fillRect(-short, -long, short*2, long*2);
+          dctx.fillRect(-long, -short, long*2, short*2);
+        }
+        dctx.restore();
+      }
+
+      if (t < 1) {
+        requestAnimationFrame(loop);
+      } else {
+        spans.forEach(function(sp) {
+          sp.style.color = 'rgba(255,255,255,0.55)';
+          sp.style.textShadow = 'none';
+        });
+        particles = [];
+        dctx.clearRect(0, 0, dustCanvas.width, dustCanvas.height);
+        setTimeout(sweep, PAUSE_MS);
+      }
+    });
+  }
+
+  setTimeout(sweep, DELAY_MS);
+
+}());
+</script>
+
+</body>
+</html>
